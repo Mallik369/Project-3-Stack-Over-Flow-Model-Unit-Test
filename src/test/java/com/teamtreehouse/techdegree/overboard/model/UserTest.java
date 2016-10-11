@@ -153,10 +153,11 @@ public class UserTest {
     @Test
     public void UnAuthorizedQuestionerAcceptingAnswerIsNotAllowed( )throws Exception {
         String message = String.format("Only %s can accept this answer as it is their question",
-                mQuestionUser.getName());;
-        //Answer Acceptance Exception is catched when Other Board User is accepting Original Questioner Answer
+                mQuestionUser.getName());
+        //Answer Acceptance Exception is catches when Other Board User is accepting Original Questioner Answer
         thrown.expect(AnswerAcceptanceException.class);
         thrown.expectMessage(message);
+
 
         //Arrange : mQuestioner asks Question, mAnswerUser is answering Question
         Question question = mQuestionUser.askQuestion("What is the difference between checked and " +
@@ -166,18 +167,20 @@ public class UserTest {
 
         //Action : mBoardUser(Unauthorized Questioner) accepting Answer
         mBoardUser.acceptAnswer(answer);
+
     }
 
     @Test
-    public void questionerAcceptingAnswerToHisQuestion() throws Exception {
+    public void questionerAcceptingAnswerToHisQuestionSetsAnswerIsAccepted() throws Exception {
         //Arrange : mQuestioner asks Question , mAnswerUser is answering Question
-        String message = String.format("%s Questioner accepted the Answer",mQuestionUser.getName());
         Question question = mQuestionUser.askQuestion("Which Method is used to Sort a Collection by" +
                 "Natural order or its elements");
         Answer answer = mAnswerUser.answerQuestion(question,"Collections.sort");
 
         //Action: mQuestionUser accepts answer
         mQuestionUser.acceptAnswer(answer);
+        String message = String.format("%s accept answer to question",
+                mQuestionUser.getName());
 
         //Assert : Verify
         assertTrue(message,answer.isAccepted());
