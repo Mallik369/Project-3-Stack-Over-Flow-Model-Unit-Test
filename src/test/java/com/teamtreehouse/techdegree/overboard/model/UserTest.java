@@ -18,6 +18,8 @@ public class UserTest {
     private User mQuestionUser;
     private User mAnswerUser;
     private User mBoardUser;
+    private Question mQuestion;
+    private Answer mAnswer;
     
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -28,15 +30,14 @@ public class UserTest {
         mQuestionUser = mBoard.createUser("Questioner");
         mAnswerUser = mBoard.createUser("Answerer");
         mBoardUser = mBoard.createUser("BoardUser");
+        mQuestion = mQuestionUser.askQuestion("Java Interfaces can extend");
+        mAnswer = mAnswerUser.answerQuestion(mQuestion,"Multiple Interfaces");
     }
 
     @Test
     public void upVotingQuestionIncrementsQuestionersReputationByFivePoints() throws Exception {
-        //Arrange : Question is asked by mQuestionUser
-        Question question = mQuestionUser.askQuestion("Java Interfaces can extend");
-
         //Action : mBoardUser can UpVote the Question
-        mBoardUser.upVote(question);
+        mBoardUser.upVote(mQuestion);
 
         //Assert : Verify Questioners reputation Goes up by five points
         assertEquals(5,mQuestionUser.getReputation());
@@ -44,11 +45,8 @@ public class UserTest {
 
     @Test
     public void downVotingQuestionDoesNotAffectReputation() throws Exception {
-        //Arrange : mQuestion asks Question
-        Question question = mQuestionUser.askQuestion("Java Interfaces can extend");
-
         //Action : mtBoardUser DownVote the Question
-        mBoardUser.downVote(question);
+        mBoardUser.downVote(mQuestion);
 
         //Assert: Verify Questioners reputation is not affected
         assertEquals(0,mQuestionUser.getReputation());
@@ -56,12 +54,8 @@ public class UserTest {
 
     @Test
     public void upVotingAnswerIncrementsAnswererReputationByTenPoints() throws Exception {
-        //Arrange : Question is asked by mQuestionUser and Answered by mAnswerUser
-        Question question = mQuestionUser.askQuestion("Java Interfaces can extend");
-        Answer answer = mAnswerUser.answerQuestion(question,"Multiple Interfaces");
-
         //Action : mQuestionUser can Upvote answer by mBoardUser
-        mQuestionUser.upVote(answer);
+        mQuestionUser.upVote(mAnswer);
 
         //Assert : Verify Answers reputation Increments by 10
         assertEquals(10,mAnswerUser.getReputation());
@@ -69,12 +63,8 @@ public class UserTest {
 
     @Test
     public void downVotingAnswerDecrementsAnswererReputationByOnePoint() throws Exception {
-        //Arrange : mQuestionUser asks Question,mAnswerUser answers Answer
-        Question question = mQuestionUser.askQuestion("Java Interfaces can extend");
-        Answer answer = mAnswerUser.answerQuestion(question,"Multiple Interfaces");
-
         //Action : mBoarduser downVote Answer
-        mBoardUser.downVote(answer);
+        mBoardUser.downVote(mAnswer);
 
         //Assert: Verify Answers reputation Decrements by 1
         assertEquals(-1,mAnswerUser.getReputation());
@@ -82,12 +72,8 @@ public class UserTest {
 
     @Test
     public void questionerAcceptAnswerIncrementsAnswererReputationByFifteenPoints() throws Exception {
-        //Arrange : Question is asked by mQuestionUser and Answered by mAnswer User
-        Question question = mQuestionUser.askQuestion("Java Interfaces can extend");
-        Answer answer = mAnswerUser.answerQuestion(question,"Multiple Interfaces");
-
         //Action : mQuestionUser accepts the answer given by mAnswerUser
-        mQuestionUser.acceptAnswer(answer);
+        mQuestionUser.acceptAnswer(mAnswer);
 
         //Assert : Verify Answerer's a 15 point reputation Boost
         assertEquals(15,mAnswerUser.getReputation());
@@ -95,17 +81,11 @@ public class UserTest {
 
     @Test
     public void questionerUpVotingQuestionIsNotAllowed() throws Exception {
-        //@ Rule changes the Behaviour of Testing
         // Voting Exception is Catches Inside Class when questioner UpVotes his Question
         thrown.expect(VotingException.class);
         thrown.expectMessage("You cannot vote for yourself!");
-
-        //Arrange : mQuestionUser is asking Question
-        Question question = mQuestionUser.askQuestion("Is it possible to access non-static members" +
-                    "without instance of the class");
-
         //Action : mQuestionUser is UpVoting Question
-        mQuestionUser.upVote(question);
+        mQuestionUser.upVote(mQuestion);
     }
 
     @Test
@@ -113,12 +93,8 @@ public class UserTest {
         //Voting Exception is Catches Inside Class when questioner  DownVotes his Question
         thrown.expect(VotingException.class);
         thrown.expectMessage("You cannot vote for yourself");
-
-        //Arrange: mQuestionUser is asking Question
-        Question question = mQuestionUser.askQuestion("How do you convert int[] to ArrayList<Integer>");
-
         //Action: mQuestionUser is DownVoting Question
-        mQuestionUser.downVote(question);
+        mQuestionUser.downVote(mQuestion);
     }
 
     @Test
@@ -126,14 +102,8 @@ public class UserTest {
         //Voting Exception is Catches Inside Class when Answerer UpVotes his Answer
         thrown.expect(VotingException.class);
         thrown.expectMessage("You cannot vote for yourself");
-
-        //Arrange: mQuestionUser is asking Question , mAnswerUser is answering Question
-        Question question = mQuestionUser.askQuestion("Is is possible to access non-static members" +
-                "without instance of class");
-        Answer answer = mAnswerUser.answerQuestion(question,"No it is not possible");
-
         //Action : mAnswerUser UpVoting his answer
-        mAnswerUser.upVote(answer);
+        mAnswerUser.upVote(mAnswer);
     }
 
     @Test
@@ -141,13 +111,8 @@ public class UserTest {
         //Voting Exception is Catches Inside Class when Answerer DownVotes his Answer
         thrown.expect(VotingException.class);
         thrown.expectMessage("You cannot vote for yourself");
-
-        //Arrange: mQuestionUser is asking Question, mAnswerUser is answering Question
-        Question question = mQuestionUser.askQuestion("How do you convert int[] to ArrayList<Integer>");
-        Answer answer = mAnswerUser.answerQuestion(question,"By using the static Array.asList Method");
-
         //Action: mAnswer DownVoting his answer
-        mAnswerUser.downVote(answer);
+        mAnswerUser.downVote(mAnswer);
     }
 
     @Test
@@ -157,32 +122,19 @@ public class UserTest {
         //Answer Acceptance Exception is catches when Other Board User is accepting Original Questioner Answer
         thrown.expect(AnswerAcceptanceException.class);
         thrown.expectMessage(message);
-
-
-        //Arrange : mQuestioner asks Question, mAnswerUser is answering Question
-        Question question = mQuestionUser.askQuestion("What is the difference between checked and " +
-                "Unchecked Exception");
-        Answer answer = mAnswerUser.answerQuestion(question,"Checked Exception must be caught while" +
-                "UnChecked Exceptions do not need to be caught");
-
         //Action : mBoardUser(Unauthorized Questioner) accepting Answer
-        mBoardUser.acceptAnswer(answer);
+        mBoardUser.acceptAnswer(mAnswer);
 
     }
 
     @Test
     public void questionerAcceptingAnswerToHisQuestionSetsAnswerIsAccepted() throws Exception {
-        //Arrange : mQuestioner asks Question , mAnswerUser is answering Question
-        Question question = mQuestionUser.askQuestion("Which Method is used to Sort a Collection by" +
-                "Natural order or its elements");
-        Answer answer = mAnswerUser.answerQuestion(question,"Collections.sort");
-
         //Action: mQuestionUser accepts answer
-        mQuestionUser.acceptAnswer(answer);
+        mQuestionUser.acceptAnswer(mAnswer);
         String message = String.format("%s accept answer to question",
                 mQuestionUser.getName());
 
         //Assert : Verify
-        assertTrue(message,answer.isAccepted());
+        assertTrue(message,mAnswer.isAccepted());
     }
 }
